@@ -1,6 +1,6 @@
 #%%
 from flask import Flask, request, jsonify
-from google import genai # <-- Neuer Import
+from google import genai
 from dotenv import load_dotenv
 import os
 
@@ -10,7 +10,7 @@ load_dotenv()
 app = Flask(__name__)
 
 # 2. Client mit der neuen Bibliothek erstellen
-# Die neue Bibliothek holt sich den Key oft automatisch, aber so ist es sicher:
+# die neue Bibliothek holt sich den Key oft automatisch, aber so ist es sicher:
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 @app.route('/generate-recipe', methods=['POST'])
