@@ -35,6 +35,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
   String _recipeText = "";
   bool _isLoading = false;
 
+
   Future<void> _generateRecipe() async {
     setState(() {
       _isLoading = true;
@@ -43,8 +44,17 @@ class _RecipeScreenState extends State<RecipeScreen> {
 
     final ingredients = _controller.text;
 
-    // Adresse für Android Emulator (10.0.2.2)
-    final url = Uri.parse('http://10.0.2.2:5000/generate-recipe');
+    String baseUrl;
+    // Prüfen, auf welcher Plattform wir laufen
+    if (Theme.of(context).platform == TargetPlatform.android) {
+      // Android Emulator braucht die Spezial-Adresse
+      baseUrl = 'http://10.0.2.2:5000/generate-recipe';
+    } else {
+      // Windows, Web und iOS Simulator nutzen localhost
+      baseUrl = 'http://127.0.0.1:5000/generate-recipe';
+    }
+
+    final url = Uri.parse(baseUrl);
 
     try {
       final response = await http.post(
@@ -117,7 +127,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
                 // HIER LAG DER FEHLER: Es muss "Markdown" (groß) heißen
                 child: _recipeText.isEmpty
                     ? const Center(child: Text("Dein Rezept erscheint hier."))
-                    : SingleChildScrollView(child: Markdown(data: _recipeText)),
+                    : Markdown(data: _recipeText),
               ),
             ),
           ],

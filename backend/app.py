@@ -1,5 +1,6 @@
 #%%
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from google import genai
 from dotenv import load_dotenv
 import os
@@ -8,10 +9,12 @@ import os
 load_dotenv()
 
 app = Flask(__name__)
+CORS(app)
 
 # 2. Client mit der neuen Bibliothek erstellen
 # die neue Bibliothek holt sich den Key oft automatisch, aber so ist es sicher:
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+
 
 @app.route('/generate-recipe', methods=['POST'])
 def generate_recipe():
@@ -32,16 +35,16 @@ def generate_recipe():
 
         # 3. Neuer Aufruf für die Generierung
         response = client.models.generate_content(
-            model='gemini-2.0-flash', # Wir nehmen direkt das neuste, schnellste Modell
+            model='gemini-flash-latest',
             contents=prompt
         )
-
-        # Zugriff auf den Text ist bei der neuen Library gleich
         return jsonify({"recipe": response.text})
+
+
 
     except Exception as e:
         print(f"Fehler: {e}")
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": "Die KI konnte gerade nicht antworten."}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
