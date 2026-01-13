@@ -97,10 +97,15 @@ class _RecipeScreenState extends State<RecipeScreen> {
           children: [
             TextField(
               controller: _controller,
+              maxLines: 3,
+              minLines: 1,
               decoration: const InputDecoration(
-                labelText: "Was ist im Kühlschrank? (z.B. Tomaten, Käse)",
-                border: OutlineInputBorder(),
+                labelText: "Was ist im Kühlschrank?",
+                hintText: 'z.B. Tomaten, Eier, alter Käse...',
                 prefixIcon: Icon(Icons.kitchen),
+                border: OutlineInputBorder(),
+                filled: true,
+                fillColor: Colors.white,
               ),
             ),
             const SizedBox(height: 15),
