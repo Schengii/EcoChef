@@ -12,34 +12,56 @@ app = Flask(__name__)
 CORS(app)
 
 # 2. Client mit der neuen Bibliothek erstellen
-# die neue Bibliothek holt sich den Key oft automatisch, aber so ist es sicher:
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 
 @app.route('/generate-recipe', methods=['POST'])
 def generate_recipe():
-    data = request.json
-    zutaten = data.get('ingredients')
+    data = request.get_json()
 
-    if not zutaten:
-        return jsonify({"error": "Keine Zutaten angegeben"}), 400
+    # 1. WICHTIG: Erst hier holen wir die Zutaten aus der App!
+    ingredients = data.get('ingredients', '')
 
-    print(f"Anfrage erhalten für: {zutaten}")
+    # 2. JETZT erst darfst du {ingredients} benutzen
+    prompt = f"""
+    Du bist 'EcoChef', ein kreativer und nachhaltiger Profi-Koch. 
+    Deine Aufgabe ist es, aus den folgenden Zutaten ein leckeres Rezept zu zaubern: {ingredients}.
+    
+    Du darfst Grundnahrungsmittel (Öl, Salz, Pfeffer, Wasser, Mehl) voraussetzen und ergänzen.
+    
+    Bitte formatiere deine Antwort exakt so (nutze Markdown):
+    
+    # 🍽️ [Hier einen lustigen Namen für das Gericht erfinden]
+    
+    **⏱️ Dauer:** [Minuten] | **👨‍🍳 Schwierigkeit:** [Leicht/Mittel/Schwer]
+    
+    ---
+    
+    ### 🛒 Zutaten
+    * [Zutat 1]
+    * [Zutat 2]
+    * ...
+    
+    ### 🔪 Zubereitung
+    1. [Erster Schritt]
+    2. [Zweiter Schritt]
+    3. ...
+    
+    ---
+    **💡 EcoChef-Tipp:** [Ein kurzer Tipp zur Resteverwertung oder Verfeinerung]
+    """
 
     try:
-        # Der Prompt an die KI
-        prompt = (
-            f"Du bist ein Koch. Erstelle ein Rezept aus diesen Zutaten: {zutaten}. "
-            f"Nutze Markdown (Fettgedruckt für Titel, Listen für Schritte)."
-        )
-
-        # 3. Neuer Aufruf für die Generierung
+        # 3. Anfrage an Google (mit dem Modell, das bei dir funktioniert hat)
         response = client.models.generate_content(
             model='gemini-flash-latest',
             contents=prompt
         )
         return jsonify({"recipe": response.text})
 
+    except Exception as e:
+        print(f"Fehler: {e}")
+        return jsonify({"error": str(e)}), 500
 
 
     except Exception as e:
