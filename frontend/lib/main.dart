@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:share_plus/share_plus.dart';
 
 void main() {
   runApp(const EcoChefApp());
@@ -59,6 +60,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
     final url = Uri.parse(baseUrl);
 
 
+
     try {
       final response = await http.post(
         url,
@@ -107,6 +109,22 @@ class _RecipeScreenState extends State<RecipeScreen> {
         _isLoading = false;
       });
     }
+  }
+
+  void _shareRecipe() {
+    // Wenn kein Rezept da ist, brechen wir ab
+    if (_recipeText.isEmpty) return;
+
+    // Wir basteln eine schöne Nachricht zusammen
+    String message = "Guck mal, was ich mit EcoChef koche! 👨‍🍳\n\n";
+    message += "$_recipeText\n\n";
+
+    if (_imageUrl != null) {
+      message += "📸 Hier ein Foto dazu: $_imageUrl";
+    }
+
+    // Das öffnet das Teilen-Menü vom Handy (WhatsApp, Mail, etc.)
+    Share.share(message);
   }
 
 
@@ -217,6 +235,16 @@ class _RecipeScreenState extends State<RecipeScreen> {
             ),
           ],
         ),
+      ),
+
+      // NEU: Der schwebende Teilen-Knopf
+      floatingActionButton: _recipeText.isEmpty
+          ? null // Kein Rezept? Kein Knopf!
+          : FloatingActionButton.extended(
+        onPressed: _shareRecipe,
+        label: const Text("Teilen"),
+        icon: const Icon(Icons.share),
+        backgroundColor: Colors.green, // Passend zum Eco-Look
       ),
     );
   }
